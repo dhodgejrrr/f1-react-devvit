@@ -325,7 +325,7 @@ export const AudioOnlyGame: React.FC<AudioOnlyGameProps> = ({
         break;
       case 'result':
         if (reactionTime !== undefined) {
-          setAnnouncement(`Your reaction time: ${reactionTime.toFixed(3)} milliseconds.`);
+          setAnnouncement(`Your reaction time: ${(reactionTime / 1000).toFixed(4)} seconds.`);
         }
         break;
     }

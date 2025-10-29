@@ -12,7 +12,7 @@ export class SocialShareService {
   static createGameResultShareText(result: GameResult): string {
     const { reactionTime, rating, driverComparison, communityPercentile } = result;
     
-    let shareText = `🏎️ F1 Start Challenge: ${reactionTime}ms (${rating.toUpperCase()})`;
+    let shareText = `🏎️ F1 Start Challenge: ${(reactionTime / 1000).toFixed(4)}s (${rating.toUpperCase()})`;
     
     // Add driver comparison if available
     if (driverComparison.fasterThan.length > 0) {
@@ -55,7 +55,7 @@ export class SocialShareService {
     rating: string, 
     challengeUrl: string
   ): string {
-    return `🏎️ I challenge you to beat my ${creatorTime}ms (${rating.toUpperCase()}) F1 start time! Think you're faster? ${challengeUrl} #F1StartChallenge`;
+    return `🏎️ I challenge you to beat my ${(creatorTime / 1000).toFixed(4)}s (${rating.toUpperCase()}) F1 start time! Think you're faster? ${challengeUrl} #F1StartChallenge`;
   }
 
   /**

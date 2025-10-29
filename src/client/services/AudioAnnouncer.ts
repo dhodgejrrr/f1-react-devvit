@@ -60,7 +60,7 @@ export class AudioAnnouncer {
       return;
     }
 
-    const timeText = `${reactionTime} milliseconds`;
+    const timeText = `${(reactionTime / 1000).toFixed(4)} seconds`;
     const ratingText = this._getRatingDescription(rating);
     this._speak(`Reaction time: ${timeText}. Rating: ${ratingText}`);
   }

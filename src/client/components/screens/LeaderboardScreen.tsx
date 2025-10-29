@@ -542,7 +542,7 @@ export const LeaderboardScreen = () => {
                     <tr
                       key={`${entry.userId}-${entry.timestamp}`}
                       role="row"
-                      aria-label={`Rank ${rank}: ${entry.username}, ${entry.reactionTime.toFixed(3)} milliseconds, ${rating.text} rating${isUser ? ', your entry' : ''}`}
+                      aria-label={`Rank ${rank}: ${entry.username}, ${(entry.reactionTime / 1000).toFixed(4)} seconds, ${rating.text} rating${isUser ? ', your entry' : ''}`}
                       style={{
                         borderBottom: '1px solid var(--color-white)',
                         backgroundColor: isUser 
@@ -605,7 +605,7 @@ export const LeaderboardScreen = () => {
                           fontSize: 'clamp(8px, 2vw, 12px)',
                           fontWeight: 'bold'
                         }}>
-                          {entry.reactionTime.toFixed(3)}MS
+                          {(entry.reactionTime / 1000).toFixed(4)}
                         </span>
                       </td>
                       <td style={{ 
