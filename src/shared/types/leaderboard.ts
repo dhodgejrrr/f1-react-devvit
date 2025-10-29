@@ -1,5 +1,5 @@
 // Leaderboard and challenge types
-import type { LeaderboardScope, TimeFilter } from './game.js';
+import type { LeaderboardScope, TimeFilter, Challenge, ChallengeAttempt, ChallengeSession, ChallengeResult } from './game.js';
 
 export interface LeaderboardEntry {
   userId: string;
@@ -9,37 +9,6 @@ export interface LeaderboardEntry {
   scope: LeaderboardScope;
   period: TimeFilter;
   flagged: boolean;
-}
-
-export interface Challenge {
-  id: string;
-  creator: string;
-  creatorTime: number;
-  seed: number; // For deterministic timing
-  createdAt: string;
-  expiresAt: string;
-  acceptedBy: ChallengeAttempt[];
-}
-
-export interface ChallengeAttempt {
-  userId: string;
-  username: string;
-  reactionTime: number;
-  timestamp: string;
-}
-
-export interface ChallengeSession {
-  challenge: Challenge;
-  seed: number;
-  ghostTiming: number;
-  isActive: boolean;
-}
-
-export interface ChallengeResult {
-  winner: string;
-  margin: number;
-  challengerTime: number;
-  opponentTime: number;
 }
 
 export interface ValidationResult {

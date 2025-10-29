@@ -11,12 +11,20 @@ export const SplashScreen = () => {
 
   const handleStart = async () => {
     try {
-      console.log('Start button clicked');
+      console.log('Start button clicked - attempting state transition');
+      console.log('Current dispatch function:', dispatch);
+      console.log('GameState.READY value:', GameState.READY);
       setLoading(true);
+      
+      // Add more debugging
+      console.log('About to dispatch TRANSITION_STATE action');
       dispatch({ type: 'TRANSITION_STATE', payload: GameState.READY });
+      console.log('Dispatch completed successfully');
+      
       setLoading(false);
     } catch (error) {
       console.error('Failed to start game:', error);
+      console.error('Error details:', error);
       setLoading(false);
     }
   };
@@ -36,7 +44,7 @@ export const SplashScreen = () => {
       minHeight: '100vh',
       gap: '32px',
       padding: '24px',
-      backgroundColor: '#000000',
+      backgroundColor: '#ff0000',
       color: '#ffffff',
       position: 'relative'
     }}>
@@ -118,7 +126,7 @@ export const SplashScreen = () => {
           disabled={loading}
           style={{
             padding: '24px 32px',
-            backgroundColor: '#ff0000',
+            backgroundColor: '#000000',
             color: '#ffffff',
             fontSize: 'clamp(16px, 4vw, 24px)',
             border: '2px solid #ffffff',

@@ -86,6 +86,9 @@ const initialState: GameContextState = {
 
 // Game Reducer
 function gameReducer(state: GameContextState, action: GameAction): GameContextState {
+  console.log('GameReducer: Processing action:', action.type, 'with payload:', action.payload);
+  console.log('GameReducer: Current state before action:', state.currentState);
+  
   switch (action.type) {
     case 'INITIALIZE_GAME':
       return {
@@ -98,10 +101,13 @@ function gameReducer(state: GameContextState, action: GameAction): GameContextSt
       };
 
     case 'TRANSITION_STATE':
-      return {
+      console.log('GameReducer: TRANSITION_STATE - changing from', state.currentState, 'to', action.payload);
+      const newState = {
         ...state,
         currentState: action.payload,
       };
+      console.log('GameReducer: New state after transition:', newState.currentState);
+      return newState;
 
     case 'START_LIGHT_SEQUENCE':
       return {
@@ -273,55 +279,20 @@ interface GameProviderProps {
 }
 
 export function GameProvider({ children }: GameProviderProps) {
-  // Load persisted state
-  const loadPersistedState = (): GameContextState => {
-    try {
-      const persistedConfig = storage.load(STORAGE_KEYS.GAME_CONFIG, DEFAULT_CONFIG);
-      const persistedSession = storage.load(STORAGE_KEYS.USER_SESSION, null);
-      
-      // Always start fresh at SPLASH screen for better UX
-      const loadedState = {
-        ...initialState,
-        currentState: GameState.SPLASH, // Force SPLASH state
-        gameConfig: persistedConfig,
-        userSession: persistedSession,
-      };
-      
-      console.log('GameProvider - loadPersistedState (forced SPLASH):', loadedState);
-      return loadedState;
-    } catch (error) {
-      console.error('Error loading persisted state, using initial state:', error);
-      return { ...initialState, currentState: GameState.SPLASH };
-    }
-  };
-
-  const [state, dispatch] = useReducer(gameReducer, initialState, loadPersistedState);
+  console.log('GameProvider: Starting initialization');
   
-  console.log('GameProvider - current state:', state);
+  // Simple initialization without localStorage for now
+  const [state, dispatch] = useReducer(gameReducer, {
+    ...initialState,
+    currentState: GameState.SPLASH
+  });
+  
+  console.log('GameProvider - initialized with state:', state);
+  console.log('GameProvider - dispatch function:', !!dispatch);
 
-  // Persist state changes
-  useEffect(() => {
-    // Save game configuration
-    storage.save(STORAGE_KEYS.GAME_CONFIG, state.gameConfig);
-  }, [state.gameConfig]);
-
-  useEffect(() => {
-    // Save user session
-    if (state.userSession) {
-      storage.save(STORAGE_KEYS.USER_SESSION, state.userSession);
-    }
-  }, [state.userSession]);
-
-  // Persist critical game state (but not runtime state like lights)
-  useEffect(() => {
-    const persistableState = {
-      currentState: state.currentState,
-      challengeId: state.challengeId,
-      ghostTiming: state.ghostTiming,
-      challengeSession: state.challengeSession,
-    };
-    storage.save(STORAGE_KEYS.GAME_STATE, persistableState);
-  }, [state.currentState, state.challengeId, state.ghostTiming]);
-
-  return <GameContext.Provider value={{ state, dispatch }}>{children}</GameContext.Provider>;
+  return (
+    <GameContext.Provider value={{ state, dispatch }}>
+      {children}
+    </GameContext.Provider>
+  );
 }

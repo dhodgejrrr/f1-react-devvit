@@ -208,7 +208,7 @@ async function syncOfflineScores() {
     
     for (const score of offlineScores) {
       try {
-        await fetch('/api/submit-score', {
+        await fetch('/api/game/submit-score', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(score)

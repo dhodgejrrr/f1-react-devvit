@@ -62,7 +62,10 @@ export class DataService {
         const data = await response.json();
         
         if (!response.ok) {
-          throw new Error(data.message || 'Failed to submit score');
+          const error = new Error(data.message || 'Failed to submit score') as any;
+          error.status = response.status;
+          error.statusText = response.statusText;
+          throw error;
         }
         
         return data as ScoreSubmissionResponse;

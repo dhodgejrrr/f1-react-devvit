@@ -43,24 +43,24 @@ export class KVStorageService {
   ): Promise<boolean> {
     const serializedValue = JSON.stringify(value);
     const dataSize = new TextEncoder().encode(serializedValue).length;
-    
+
     // Check quota before setting
     const quotaCheck = await KVStorageService.checkQuota(dataSize);
     if (!quotaCheck.allowed) {
       throw new KVStorageError('QUOTA_EXCEEDED', `Storage quota exceeded. ${quotaCheck.message}`);
     }
-    
+
     for (let attempt = 0; attempt < KVStorageService.MAX_RETRIES; attempt++) {
       try {
         await redis.set(key, serializedValue, { expiration: new Date(Date.now() + ttl * 1000) });
-        
+
         // Update quota usage on successful set
         await KVStorageService.updateQuotaUsage('increment', dataSize);
-        
+
         return true;
       } catch (error) {
         console.error(`KV set attempt ${attempt + 1} failed for key ${key}:`, error);
-        
+
         if (attempt === KVStorageService.MAX_RETRIES - 1) {
           // Try fallback to localStorage if available
           if (await KVStorageService.tryLocalStorageFallback('set', key, value, ttl)) {
@@ -69,13 +69,13 @@ export class KVStorageService {
           }
           throw new KVStorageError('SET_FAILED', `Failed to set key ${key} after ${KVStorageService.MAX_RETRIES} attempts`, error);
         }
-        
+
         // Exponential backoff with jitter
         const delay = KVStorageService.RETRY_DELAY_BASE * Math.pow(2, attempt) + Math.random() * 1000;
         await KVStorageService.delay(delay);
       }
     }
-    
+
     return false;
   }
 
@@ -94,7 +94,7 @@ export class KVStorageService {
         return JSON.parse(value) as T;
       } catch (error) {
         console.error(`KV get attempt ${attempt + 1} failed for key ${key}:`, error);
-        
+
         if (attempt === KVStorageService.MAX_RETRIES - 1) {
           // Try fallback to localStorage on final failure
           const fallbackValue = await KVStorageService.tryLocalStorageFallback('get', key);
@@ -104,12 +104,12 @@ export class KVStorageService {
           }
           throw new KVStorageError('GET_FAILED', `Failed to get key ${key} after ${KVStorageService.MAX_RETRIES} attempts`, error);
         }
-        
+
         const delay = KVStorageService.RETRY_DELAY_BASE * Math.pow(2, attempt) + Math.random() * 1000;
         await KVStorageService.delay(delay);
       }
     }
-    
+
     return null;
   }
 
@@ -131,30 +131,30 @@ export class KVStorageService {
     for (let attempt = 0; attempt < KVStorageService.MAX_RETRIES; attempt++) {
       try {
         await redis.del(key);
-        
+
         // Update quota usage on successful deletion
         if (dataSize > 0) {
           await KVStorageService.updateQuotaUsage('decrement', dataSize);
         }
-        
+
         // Also delete from localStorage fallback if it exists
         await KVStorageService.tryLocalStorageFallback('delete', key);
-        
+
         return true;
       } catch (error) {
         console.error(`KV delete attempt ${attempt + 1} failed for key ${key}:`, error);
-        
+
         if (attempt === KVStorageService.MAX_RETRIES - 1) {
           // Try fallback deletion
           await KVStorageService.tryLocalStorageFallback('delete', key);
           throw new KVStorageError('DELETE_FAILED', `Failed to delete key ${key} after ${KVStorageService.MAX_RETRIES} attempts`, error);
         }
-        
+
         const delay = KVStorageService.RETRY_DELAY_BASE * Math.pow(2, attempt) + Math.random() * 1000;
         await KVStorageService.delay(delay);
       }
     }
-    
+
     return false;
   }
 
@@ -170,25 +170,25 @@ export class KVStorageService {
       try {
         // Get current value
         const current = await KVStorageService.get<T>(key);
-        
+
         // Apply update function
         const updated = updateFn(current);
-        
+
         // Set updated value
         await KVStorageService.set(key, updated, ttl);
-        
+
         return updated;
       } catch (error) {
         console.error(`KV atomic update attempt ${attempt + 1} failed for key ${key}:`, error);
-        
+
         if (attempt === KVStorageService.MAX_RETRIES - 1) {
           throw new KVStorageError('ATOMIC_UPDATE_FAILED', `Failed to atomically update key ${key} after ${KVStorageService.MAX_RETRIES} attempts`, error);
         }
-        
+
         await KVStorageService.delay(KVStorageService.RETRY_DELAY_BASE * Math.pow(2, attempt));
       }
     }
-    
+
     throw new KVStorageError('ATOMIC_UPDATE_FAILED', `Atomic update failed for key ${key}`);
   }
 
@@ -253,10 +253,10 @@ export class KVStorageService {
       const quotaKey = KVStorageService.keys.quota();
       const currentUsage = await redis.get(quotaKey);
       const usage = currentUsage ? parseInt(currentUsage) : 0;
-      
+
       const newUsage = operation === 'increment' ? usage + bytes : Math.max(0, usage - bytes);
       await redis.set(quotaKey, newUsage.toString());
-      
+
       // Check for quota warnings
       const quotaPercentage = newUsage / KVStorageService.MAX_STORAGE_SIZE;
       if (quotaPercentage >= KVStorageService.QUOTA_CRITICAL_THRESHOLD) {
@@ -266,7 +266,7 @@ export class KVStorageService {
       } else if (quotaPercentage >= KVStorageService.QUOTA_WARNING_THRESHOLD) {
         console.warn(`WARNING: Storage quota at ${(quotaPercentage * 100).toFixed(1)}% (${newUsage} bytes)`);
       }
-      
+
       return newUsage;
     } catch (error) {
       console.error('Failed to update quota usage:', error);
@@ -339,7 +339,7 @@ export class KVStorageService {
         maxStorage: KVStorageService.MAX_STORAGE_SIZE,
         quotaPercentage,
         status: quotaPercentage >= KVStorageService.QUOTA_CRITICAL_THRESHOLD ? 'critical' :
-                quotaPercentage >= KVStorageService.QUOTA_WARNING_THRESHOLD ? 'warning' : 'ok',
+          quotaPercentage >= KVStorageService.QUOTA_WARNING_THRESHOLD ? 'warning' : 'ok',
         availableSpace: KVStorageService.MAX_STORAGE_SIZE - usage
       };
     } catch (error) {
@@ -376,14 +376,14 @@ export class KVStorageService {
     let cleanedBytes = 0;
     try {
       console.log('Performing emergency cleanup due to critical quota usage');
-      
+
       // Clean up old rate limit entries (they expire naturally but we can clean them early)
       // Clean up expired challenges (older than 7 days)
       // This is a simplified cleanup - in production you'd want more sophisticated logic
-      
+
       // Note: Since Devvit Redis doesn't support SCAN operations, we rely on TTL for cleanup
       // This method serves as a placeholder for future manual cleanup operations
-      
+
       console.log(`Emergency cleanup completed, estimated ${cleanedBytes} bytes freed`);
       return cleanedBytes;
     } catch (error) {
@@ -398,26 +398,26 @@ export class KVStorageService {
   static async testConnection(): Promise<ConnectionTestResult> {
     const testKey = 'connection_test_' + Date.now();
     const testValue = { test: true, timestamp: Date.now() };
-    
+
     try {
       // Test write
       const writeStart = Date.now();
       await redis.set(testKey, JSON.stringify(testValue));
       const writeTime = Date.now() - writeStart;
-      
+
       // Test read
       const readStart = Date.now();
       const retrieved = await redis.get(testKey);
       const readTime = Date.now() - readStart;
-      
+
       // Test delete
       const deleteStart = Date.now();
       await redis.del(testKey);
       const deleteTime = Date.now() - deleteStart;
-      
+
       // Verify deletion
       const verifyValue = await redis.get(testKey);
-      
+
       return {
         success: true,
         latency: {
@@ -532,7 +532,7 @@ export class LocalStorageFallback {
         timestamp: Date.now(),
         ttl: ttl ? Date.now() + (ttl * 1000) : null
       };
-      
+
       if (typeof globalThis !== 'undefined' && 'localStorage' in globalThis) {
         const localStorage = (globalThis as any).localStorage;
         localStorage.setItem(LocalStorageFallback.PREFIX + key, JSON.stringify(data));
@@ -551,15 +551,15 @@ export class LocalStorageFallback {
         const localStorage = (globalThis as any).localStorage;
         const item = localStorage.getItem(LocalStorageFallback.PREFIX + key);
         if (!item) return null;
-        
+
         const data = JSON.parse(item);
-        
+
         // Check TTL
         if (data.ttl && Date.now() > data.ttl) {
           LocalStorageFallback.delete(key);
           return null;
         }
-        
+
         return data.value as T;
       }
       return null;
@@ -587,7 +587,7 @@ export class LocalStorageFallback {
     try {
       if (typeof globalThis !== 'undefined' && 'localStorage' in globalThis) {
         const localStorage = (globalThis as any).localStorage;
-        const keys = Object.keys(localStorage).filter(key => 
+        const keys = Object.keys(localStorage).filter(key =>
           key.startsWith(LocalStorageFallback.PREFIX)
         );
         keys.forEach(key => localStorage.removeItem(key));
@@ -607,10 +607,10 @@ export class LocalStorageFallback {
     try {
       if (typeof globalThis !== 'undefined' && 'localStorage' in globalThis) {
         const localStorage = (globalThis as any).localStorage;
-        const keys = Object.keys(localStorage).filter(key => 
+        const keys = Object.keys(localStorage).filter(key =>
           key.startsWith(LocalStorageFallback.PREFIX)
         );
-        
+
         let totalSize = 0;
         keys.forEach(key => {
           const item = localStorage.getItem(key);
@@ -621,7 +621,7 @@ export class LocalStorageFallback {
 
         // Estimate available space (localStorage typically has 5-10MB limit)
         const estimatedLimit = 5 * 1024 * 1024; // 5MB
-        
+
         return {
           used: totalSize,
           available: Math.max(0, estimatedLimit - totalSize),

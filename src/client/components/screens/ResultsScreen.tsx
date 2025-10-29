@@ -294,8 +294,8 @@ export const ResultsScreen = () => {
       let canRetry = true;
       
       if (error instanceof Error) {
-        if (error.message.includes('RATE_LIMITED')) {
-          errorMessage = 'Too many submissions. Please wait before trying again.';
+        if (error.message.includes('RATE_LIMITED') || error.message.includes('Too Many Requests') || (error as any)?.status === 429) {
+          errorMessage = 'Too many submissions. Please wait a minute before trying again.';
           canRetry = false;
         } else if (error.message.includes('DUPLICATE_SUBMISSION')) {
           errorMessage = 'This score has already been submitted.';

@@ -331,6 +331,11 @@ export class ErrorReportingService {
           error: lastError
         });
 
+        // Don't retry on certain error types
+        if (ErrorReportingService.shouldNotRetry(error, lastError)) {
+          break;
+        }
+
         // Don't retry on final attempt
         if (attempt === ErrorReportingService.RETRY_DELAYS.length - 1) {
           break;
@@ -537,7 +542,9 @@ export class ErrorReportingService {
       context: {
         userAgent: navigator.userAgent,
         url: window.location.href,
-        stack: error instanceof Error ? (error.stack || 'No stack trace') : 'No stack trace'
+        stack: error instanceof Error ? (error.stack || 'No stack trace') : 'No stack trace',
+        httpStatus: error?.status,
+        httpStatusText: error?.statusText
       }
     };
   }
@@ -546,6 +553,13 @@ export class ErrorReportingService {
    * Classify error type based on error characteristics
    */
   private static classifyError(error: any): GameErrorType {
+    // Check for HTTP status codes first
+    if (error && typeof error === 'object' && 'status' in error) {
+      if (error.status === 429) {
+        return 'RATE_LIMIT_ERROR';
+      }
+    }
+
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return 'NETWORK_ERROR';
     }
@@ -565,7 +579,7 @@ export class ErrorReportingService {
         return 'STORAGE_ERROR';
       }
       
-      if (message.includes('rate limit') || message.includes('too many')) {
+      if (message.includes('rate limit') || message.includes('too many') || message.includes('429')) {
         return 'RATE_LIMIT_ERROR';
       }
       
@@ -579,6 +593,43 @@ export class ErrorReportingService {
     }
     
     return 'UNKNOWN_ERROR';
+  }
+
+  /**
+   * Check if an error should not be retried
+   */
+  private static shouldNotRetry(error: any, gameError: GameError): boolean {
+    // Don't retry rate limit errors
+    if (gameError.type === 'RATE_LIMIT_ERROR') {
+      return true;
+    }
+
+    // Don't retry HTTP 429 (Too Many Requests)
+    if (error && typeof error === 'object' && 'status' in error && error.status === 429) {
+      return true;
+    }
+
+    // Don't retry if error message indicates rate limiting
+    if (error instanceof Error && error.message.includes('429')) {
+      return true;
+    }
+
+    // Don't retry validation errors (they won't succeed on retry)
+    if (gameError.type === 'VALIDATION_ERROR') {
+      return true;
+    }
+
+    // Don't retry quota exceeded errors
+    if (gameError.type === 'QUOTA_EXCEEDED') {
+      return true;
+    }
+
+    // Don't retry browser compatibility issues
+    if (gameError.type === 'BROWSER_COMPATIBILITY') {
+      return true;
+    }
+
+    return false;
   }
 
   /**
