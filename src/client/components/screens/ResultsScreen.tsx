@@ -298,7 +298,11 @@ export const ResultsScreen = () => {
           errorMessage = 'Too many submissions. Please wait a minute before trying again.';
           canRetry = false;
         } else if (error.message.includes('DUPLICATE_SUBMISSION')) {
-          errorMessage = 'This score has already been submitted.';
+          if (error.message.includes('too rapid')) {
+            errorMessage = 'Please wait a moment between games before submitting another score.';
+          } else {
+            errorMessage = 'This score has already been submitted recently.';
+          }
           canRetry = false;
         } else if (error.message.includes('VALIDATION_FAILED')) {
           errorMessage = 'Invalid score data. Please try playing again.';

@@ -607,7 +607,7 @@ export class LeaderboardService {
     reactionTime: number,
     scope: LeaderboardScope,
     period: TimeFilter,
-    timeWindowMs: number = 5000 // 5 seconds
+    timeWindowMs: number = 10000 // 10 seconds - longer window for checking recent submissions
   ): Promise<DuplicateCheckResult> {
     try {
       const entries = await LeaderboardService.getLeaderboard(scope, period, 50); // Check recent entries
@@ -623,10 +623,23 @@ export class LeaderboardService {
         return timeDiff <= timeWindowMs;
       });
 
-      // Check for exact or very similar reaction times
+      // Check for exact or suspiciously similar reaction times
       const duplicates = recentSubmissions.filter(entry => {
         const timeDiff = Math.abs(entry.reactionTime - reactionTime);
-        return timeDiff <= 5; // Within 5ms is considered duplicate
+        const submissionTime = new Date(entry.timestamp).getTime();
+        const timeGap = now - submissionTime;
+        
+        // Exact match within 1ms and submitted within 2 seconds = likely duplicate
+        if (timeDiff <= 1 && timeGap <= 2000) {
+          return true;
+        }
+        
+        // Very similar times (within 3ms) submitted very quickly (within 500ms) = suspicious
+        if (timeDiff <= 3 && timeGap <= 500) {
+          return true;
+        }
+        
+        return false;
       });
 
       if (duplicates.length > 0) {
@@ -638,11 +651,18 @@ export class LeaderboardService {
       }
 
       // Check for rapid successive submissions (potential automation)
-      if (recentSubmissions.length >= 3) {
+      // Allow more submissions but with a shorter time window for automation detection
+      const veryRecentSubmissions = recentSubmissions.filter(entry => {
+        const submissionTime = new Date(entry.timestamp).getTime();
+        const timeDiff = now - submissionTime;
+        return timeDiff <= 1000; // Only check last 1 second for automation
+      });
+
+      if (veryRecentSubmissions.length >= 2) {
         return {
           isDuplicate: true,
-          existingEntry: recentSubmissions[0] || null,
-          message: 'Too many submissions in short time period'
+          existingEntry: veryRecentSubmissions[0] || null,
+          message: 'Submissions too rapid - please wait a moment between games'
         };
       }
 
