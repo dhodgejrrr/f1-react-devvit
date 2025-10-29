@@ -43,17 +43,7 @@ export const SplashScreen = () => {
       position: 'relative',
       justifyContent: 'center'
     }}>
-      {/* Debug indicator */}
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        left: '10px',
-        color: '#00ff00',
-        fontSize: '12px',
-        fontFamily: 'monospace'
-      }}>
-        SPLASH SCREEN RENDERED
-      </div>
+
 
       {/* Main Title */}
       <div className="layout-stack" style={{ textAlign: 'center' }}>

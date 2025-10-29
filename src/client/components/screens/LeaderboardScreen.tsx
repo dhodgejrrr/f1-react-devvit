@@ -73,7 +73,7 @@ export const LeaderboardScreen = () => {
         setLoadingMore(true);
       }
 
-      const limit = 50; // Load 50 entries at a time
+      const limit = 25; // Load top 25 entries only
       
       const response: LeaderboardResponse = await DataService.getLeaderboard(
         scope, 
@@ -88,7 +88,7 @@ export const LeaderboardScreen = () => {
         stats: response.stats,
         loading: false,
         error: null,
-        hasMore: response.entries.length === limit,
+        hasMore: false, // Cap at 25 entries
         currentPage: reset ? 1 : prev.currentPage + 1
       }));
 
@@ -216,7 +216,7 @@ export const LeaderboardScreen = () => {
         }
         break;
     }
-  }, [handleBackToMenu, handlePlayGame]);
+  }, []);
 
   // Add keyboard event listener
   useEffect(() => {
@@ -245,10 +245,7 @@ export const LeaderboardScreen = () => {
   };
 
   return (
-    <div className="responsive-container layout-stack safe-area-container" style={{ 
-      minHeight: '100vh',
-      overflowY: 'auto'
-    }}>
+    <div className="leaderboard-screen responsive-container layout-stack safe-area-container">
       {/* Header */}
       <div className="content-container" style={{ textAlign: 'center' }}>
         <div className="layout-inline" style={{ justifyContent: 'space-between', marginBottom: 'var(--spacing-md)' }}>
@@ -345,14 +342,15 @@ export const LeaderboardScreen = () => {
 
       {/* Error State */}
       {leaderboard.error && (
-        <div className="arcade-container" style={{
-          backgroundColor: 'var(--color-black)',
-          padding: 'var(--spacing-lg)',
-          border: '2px solid var(--color-red)',
-          maxWidth: '600px',
-          width: '100%',
-          textAlign: 'center'
-        }}>
+        <div style={{
+            backgroundColor: 'var(--color-black)',
+            padding: 'var(--spacing-lg)',
+            border: '2px solid var(--color-red)',
+            maxWidth: '600px',
+            width: '100%',
+            textAlign: 'center',
+            borderRadius: '0'
+          }}>
           <div className="text-arcade text-medium color-red" style={{ marginBottom: 'var(--spacing-md)' }}>
             ERROR LOADING LEADERBOARD
           </div>
@@ -379,14 +377,15 @@ export const LeaderboardScreen = () => {
 
       {/* Loading State */}
       {leaderboard.loading && !leaderboard.error && (
-        <div className="arcade-container" style={{
-          backgroundColor: 'var(--color-black)',
-          padding: 'var(--spacing-xl)',
-          border: '2px solid var(--color-white)',
-          maxWidth: '400px',
-          width: '100%',
-          textAlign: 'center'
-        }}>
+        <div style={{
+            backgroundColor: 'var(--color-black)',
+            padding: 'var(--spacing-xl)',
+            border: '2px solid var(--color-white)',
+            maxWidth: '400px',
+            width: '100%',
+            textAlign: 'center',
+            borderRadius: '0'
+          }}>
           <div className="text-arcade text-medium color-yellow" style={{ marginBottom: 'var(--spacing-md)' }}>
             LOADING LEADERBOARD...
           </div>
@@ -398,14 +397,15 @@ export const LeaderboardScreen = () => {
 
       {/* Empty State */}
       {!leaderboard.loading && !leaderboard.error && leaderboard.entries.length === 0 && (
-        <div className="arcade-container" style={{
-          backgroundColor: 'var(--color-black)',
-          padding: 'var(--spacing-xl)',
-          border: '2px solid var(--color-white)',
-          maxWidth: '600px',
-          width: '100%',
-          textAlign: 'center'
-        }}>
+        <div style={{
+            backgroundColor: 'var(--color-black)',
+            padding: 'var(--spacing-xl)',
+            border: '2px solid var(--color-white)',
+            maxWidth: '600px',
+            width: '100%',
+            textAlign: 'center',
+            borderRadius: '0'
+          }}>
           <div className="text-arcade text-medium color-yellow" style={{ marginBottom: 'var(--spacing-md)' }}>
             NO SCORES YET
           </div>
@@ -433,13 +433,16 @@ export const LeaderboardScreen = () => {
       {/* Leaderboard Table */}
       {!leaderboard.loading && !leaderboard.error && leaderboard.entries.length > 0 && (
         <div 
-          className="content-wide responsive-table-container" 
-          role="region"
-          aria-label="Leaderboard table"
-          style={{
-            backgroundColor: 'var(--color-black)'
-          }}
-        >
+            className="leaderboard-table-container"
+            role="region"
+            aria-label="Leaderboard table"
+            style={{
+              width: '100%',
+              maxWidth: '800px',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
           <div style={{
             backgroundColor: 'var(--color-black)',
             padding: 'var(--spacing-md)',
@@ -465,9 +468,9 @@ export const LeaderboardScreen = () => {
 
           <div style={{ 
             overflowX: 'auto', 
-            maxHeight: '60vh', 
             overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch' // Smooth scrolling on iOS
+            WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+            flex: '1 1 auto'
           }}>
             <table 
               role="table"
@@ -698,13 +701,14 @@ export const LeaderboardScreen = () => {
 
       {/* User Stats */}
       {userSession && (
-        <div className="arcade-container" style={{
-          backgroundColor: 'var(--color-black)',
-          padding: 'var(--spacing-lg)',
-          border: '2px solid var(--color-white)',
-          maxWidth: '500px',
-          width: '100%'
-        }}>
+        <div style={{
+            backgroundColor: 'var(--color-black)',
+            padding: 'var(--spacing-lg)',
+            border: '2px solid var(--color-white)',
+            maxWidth: '500px',
+            width: '100%',
+            borderRadius: '0'
+          }}>
           <h3 className="text-arcade text-medium color-yellow" style={{ textAlign: 'center', marginBottom: 'var(--spacing-md)' }}>
             YOUR PERFORMANCE
           </h3>
@@ -853,14 +857,15 @@ export const LeaderboardScreen = () => {
       )}
 
       {/* Keyboard Shortcuts Info */}
-      <div className="arcade-container" style={{
-        backgroundColor: 'var(--color-black)',
-        padding: 'var(--spacing-md)',
-        border: '1px solid var(--color-white)',
-        maxWidth: '400px',
-        width: '100%',
-        textAlign: 'center'
-      }}>
+      <div style={{
+          backgroundColor: 'var(--color-black)',
+          padding: 'var(--spacing-md)',
+          border: '1px solid var(--color-white)',
+          maxWidth: '400px',
+          width: '100%',
+          textAlign: 'center',
+          borderRadius: '0'
+        }}>
         <div className="text-arcade text-small color-white" style={{ marginBottom: 'var(--spacing-sm)' }}>
           KEYBOARD SHORTCUTS:
         </div>
@@ -878,7 +883,14 @@ export const LeaderboardScreen = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="content-narrow layout-stack">
+      <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'clamp(8px, 2vw, 16px)',
+          alignItems: 'center',
+          width: '100%',
+          maxWidth: '400px'
+        }}>
         <button
           onClick={handlePlayGame}
           className="text-arcade arcade-focus instant-change touch-target responsive-button"

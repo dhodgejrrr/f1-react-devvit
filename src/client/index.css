@@ -1616,6 +1616,44 @@ Performance Optimization Classes */
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Leaderboard Screen Specific Styles */
+.leaderboard-screen {
+  height: 100vh !important;
+  min-height: 100vh !important;
+  max-height: 100vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.leaderboard-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: clamp(8px, 2vw, 16px);
+}
+
+.leaderboard-table-container {
+  min-height: 300px !important;
+  max-height: 60vh !important;
+  border: 2px solid var(--color-white);
+  background-color: var(--color-black);
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.leaderboard-table-container > div:last-child {
+  flex: 1 1 auto;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Override responsive container for leaderboard */
+.leaderboard-screen.responsive-container {
+  min-height: 100vh !important;
+  max-height: 100vh !important;
+  height: 100vh !important;
+  padding: clamp(8px, 2vw, 16px) !important;
+}
+
 /* Critical Path Optimization */
 .critical-path {
   contain: strict;

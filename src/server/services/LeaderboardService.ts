@@ -85,7 +85,7 @@ export class LeaderboardService {
   static async getLeaderboard(
     scope: LeaderboardScope, 
     filter: TimeFilter,
-    limit: number = 100
+    limit: number = 25
   ): Promise<LeaderboardEntry[]> {
     try {
       const leaderboardKey = KVStorageService.keys.leaderboard(scope, filter);
