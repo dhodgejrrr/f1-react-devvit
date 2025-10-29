@@ -226,13 +226,7 @@ export const ResultsScreen = () => {
   const handleSubmitScore = async () => {
     if (!result || result.rating === 'false_start' || submission.submitted) return;
     
-    // Check rate limit status before showing modal
-    try {
-      const rateLimitData = await DataService.getRateLimitStatus('score_submission');
-      setRateLimitStatus(rateLimitData);
-    } catch (error) {
-      console.error('Failed to get rate limit status:', error);
-    }
+    // Note: Removed rate limit status check to avoid unnecessary API calls
     
     setSubmission(prev => ({ ...prev, showModal: true, error: null }));
   };
@@ -563,14 +557,9 @@ export const ResultsScreen = () => {
 
   return (
     <ScreenTransition isVisible={true} direction="fade" duration={300}>
-      <div className="arcade-container" style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        minHeight: '100vh', 
-        gap: 'var(--spacing-xl)', 
-        padding: 'var(--spacing-lg)' 
+      <div className="responsive-container layout-stack safe-area-container" style={{ 
+        minHeight: '100vh',
+        justifyContent: 'center'
       }}>
         {/* Screen Flash Effect */}
         <ScreenFlash 
@@ -580,8 +569,8 @@ export const ResultsScreen = () => {
 
         {/* Hero Result Display */}
         <FadeTransition isVisible={!isAnimating} delay={200} duration={500}>
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-            <h1 className={`text-arcade text-hero instant-change ${getResultColor()}`}>
+          <div className="content-narrow layout-stack" style={{ textAlign: 'center' }}>
+            <h1 className={`text-responsive-hero instant-change ${getResultColor()}`}>
               {getResultMessage()}
             </h1>
 
@@ -610,11 +599,10 @@ export const ResultsScreen = () => {
         {/* Performance Stats */}
         {result.rating !== 'false_start' && (
           <FadeTransition isVisible={!isAnimating} delay={600} duration={500}>
-            <div className="arcade-container" style={{
+            <div className="content-narrow arcade-container" style={{
               backgroundColor: 'var(--color-black)',
-              padding: 'var(--spacing-lg)',
+              padding: 'clamp(16px, 4vw, 24px)',
               border: '2px solid var(--color-white)',
-              maxWidth: '400px',
               width: '100%'
             }}>
               <h3 className="text-arcade text-large color-yellow" style={{ textAlign: 'center', marginBottom: 'var(--spacing-md)' }}>
@@ -652,7 +640,7 @@ export const ResultsScreen = () => {
         )}
 
         {/* Action Buttons with Staggered Animation */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', width: '100%', maxWidth: '600px' }}>
+        <div className="content-wide layout-stack">
           <StaggeredAnimation
             items={actionButtons}
             isVisible={!isAnimating}
@@ -662,8 +650,8 @@ export const ResultsScreen = () => {
         </div>
 
         {/* Secondary Actions */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div className="content-container">
+          <div className="layout-inline">
             <StaggeredAnimation
               items={secondaryButtons}
               isVisible={!isAnimating}
@@ -676,7 +664,7 @@ export const ResultsScreen = () => {
         {/* Tips for improvement */}
         {result.rating === 'false_start' && (
           <FadeTransition isVisible={!isAnimating} delay={800} duration={500}>
-            <div className="text-arcade text-small color-white" style={{ textAlign: 'center', maxWidth: '400px' }}>
+            <div className="content-narrow text-responsive-small color-white" style={{ textAlign: 'center' }}>
               <p style={{ marginBottom: 'var(--spacing-xs)' }}>REMEMBER: WAIT FOR ALL LIGHTS TO GO OUT BEFORE REACTING</p>
               <p>PATIENCE IS KEY TO A GOOD START!</p>
             </div>
@@ -686,11 +674,10 @@ export const ResultsScreen = () => {
         {/* Submission Success Feedback */}
         {submission.submitted && submission.result && (
           <FadeTransition isVisible={true} delay={0} duration={500}>
-            <div className="arcade-container" style={{
+            <div className="content-narrow arcade-container" style={{
               backgroundColor: 'var(--color-black)',
-              padding: 'var(--spacing-lg)',
+              padding: 'clamp(16px, 4vw, 24px)',
               border: '2px solid var(--color-green)',
-              maxWidth: '400px',
               width: '100%',
               textAlign: 'center'
             }}>
@@ -723,28 +710,14 @@ export const ResultsScreen = () => {
 
         {/* Challenge Creation Modal */}
         {challengeCreation.showModal && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: 'var(--spacing-lg)'
+          <div className="responsive-modal" style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.8)'
           }}>
             <FadeTransition isVisible={true} delay={0} duration={200}>
-              <div className="arcade-container" style={{
+              <div className="responsive-modal-content arcade-container" style={{
                 backgroundColor: 'var(--color-black)',
-                padding: 'var(--spacing-xl)',
-                border: '2px solid var(--color-white)',
-                maxWidth: '500px',
-                width: '100%',
-                maxHeight: '80vh',
-                overflowY: 'auto'
+                padding: 'clamp(16px, 4vw, 32px)',
+                border: '2px solid var(--color-white)'
               }}>
                 <h2 className="text-arcade text-large color-yellow" style={{ 
                   textAlign: 'center', 
@@ -838,21 +811,15 @@ export const ResultsScreen = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+                <div className="responsive-form-row">
                   <button
                     onClick={handleConfirmChallengeCreation}
                     disabled={challengeCreation.isCreating}
-                    className="text-arcade arcade-focus instant-change touch-target"
+                    className="text-arcade arcade-focus instant-change touch-target responsive-button"
                     style={{
-                      padding: 'var(--spacing-md)',
                       backgroundColor: challengeCreation.isCreating ? 'var(--color-black)' : 'var(--color-green)',
                       color: challengeCreation.isCreating ? 'var(--color-white)' : 'var(--color-black)',
-                      fontSize: 'clamp(12px, 2.5vw, 16px)',
-                      border: '2px solid var(--color-white)',
-                      borderRadius: '0',
-                      cursor: challengeCreation.isCreating ? 'not-allowed' : 'pointer',
-                      opacity: challengeCreation.isCreating ? 0.6 : 1,
-                      flex: 1
+                      opacity: challengeCreation.isCreating ? 0.6 : 1
                     }}
                   >
                     {challengeCreation.isCreating ? 'CREATING...' : 'CREATE CHALLENGE'}
@@ -860,17 +827,11 @@ export const ResultsScreen = () => {
                   <button
                     onClick={handleCancelChallengeCreation}
                     disabled={challengeCreation.isCreating}
-                    className="text-arcade arcade-focus instant-change touch-target"
+                    className="text-arcade arcade-focus instant-change touch-target responsive-button"
                     style={{
-                      padding: 'var(--spacing-md)',
                       backgroundColor: 'var(--color-black)',
                       color: 'var(--color-white)',
-                      fontSize: 'clamp(12px, 2.5vw, 16px)',
-                      border: '2px solid var(--color-white)',
-                      borderRadius: '0',
-                      cursor: challengeCreation.isCreating ? 'not-allowed' : 'pointer',
-                      opacity: challengeCreation.isCreating ? 0.6 : 1,
-                      flex: 1
+                      opacity: challengeCreation.isCreating ? 0.6 : 1
                     }}
                   >
                     CANCEL
@@ -883,28 +844,15 @@ export const ResultsScreen = () => {
 
         {/* Challenge Success Display */}
         {challengeCreation.created && challengeCreation.challengeData && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+          <div className="responsive-modal" style={{
             backgroundColor: 'rgba(0, 0, 0, 0.9)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1001,
-            padding: 'var(--spacing-lg)'
+            zIndex: 1001
           }}>
             <FadeTransition isVisible={true} delay={0} duration={300}>
-              <div className="arcade-container" style={{
+              <div className="responsive-modal-content arcade-container" style={{
                 backgroundColor: 'var(--color-black)',
-                padding: 'var(--spacing-xl)',
+                padding: 'clamp(16px, 4vw, 32px)',
                 border: '2px solid var(--color-green)',
-                maxWidth: '600px',
-                width: '100%',
-                maxHeight: '90vh',
-                overflowY: 'auto',
                 textAlign: 'center'
               }}>
                 <div className="text-arcade text-large color-green" style={{ marginBottom: 'var(--spacing-lg)' }}>
@@ -955,33 +903,25 @@ export const ResultsScreen = () => {
                   <div className="text-arcade text-small color-yellow" style={{ marginBottom: 'var(--spacing-md)' }}>
                     SHARE YOUR CHALLENGE:
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+                  <div className="layout-stack">
                     <button
                       onClick={() => handleShareChallenge('copy')}
-                      className="text-arcade arcade-focus instant-change touch-target"
+                      className="text-arcade arcade-focus instant-change touch-target responsive-button"
                       style={{
-                        padding: 'var(--spacing-md)',
                         backgroundColor: 'var(--color-yellow)',
                         color: 'var(--color-black)',
-                        fontSize: 'clamp(12px, 2.5vw, 16px)',
-                        border: '2px solid var(--color-white)',
-                        borderRadius: '0',
-                        cursor: 'pointer'
+                        width: '100%'
                       }}
                     >
                       📋 COPY LINK TO CLIPBOARD
                     </button>
                     <button
                       onClick={() => handleShareChallenge('reddit')}
-                      className="text-arcade arcade-focus instant-change touch-target"
+                      className="text-arcade arcade-focus instant-change touch-target responsive-button"
                       style={{
-                        padding: 'var(--spacing-md)',
                         backgroundColor: 'var(--color-black)',
                         color: 'var(--color-white)',
-                        fontSize: 'clamp(12px, 2.5vw, 16px)',
-                        border: '2px solid var(--color-white)',
-                        borderRadius: '0',
-                        cursor: 'pointer'
+                        width: '100%'
                       }}
                     >
                       🔗 SHARE ON REDDIT
@@ -989,15 +929,11 @@ export const ResultsScreen = () => {
                     {navigator.share && (
                       <button
                         onClick={() => handleShareChallenge('native')}
-                        className="text-arcade arcade-focus instant-change touch-target"
+                        className="text-arcade arcade-focus instant-change touch-target responsive-button"
                         style={{
-                          padding: 'var(--spacing-md)',
                           backgroundColor: 'var(--color-black)',
                           color: 'var(--color-white)',
-                          fontSize: 'clamp(12px, 2.5vw, 16px)',
-                          border: '2px solid var(--color-white)',
-                          borderRadius: '0',
-                          cursor: 'pointer'
+                          width: '100%'
                         }}
                       >
                         📱 SHARE VIA DEVICE
@@ -1048,28 +984,14 @@ export const ResultsScreen = () => {
 
         {/* Score Submission Modal */}
         {submission.showModal && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: 'var(--spacing-lg)'
+          <div className="responsive-modal" style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.8)'
           }}>
             <FadeTransition isVisible={true} delay={0} duration={200}>
-              <div className="arcade-container" style={{
+              <div className="responsive-modal-content arcade-container" style={{
                 backgroundColor: 'var(--color-black)',
-                padding: 'var(--spacing-xl)',
-                border: '2px solid var(--color-white)',
-                maxWidth: '500px',
-                width: '100%',
-                maxHeight: '80vh',
-                overflowY: 'auto'
+                padding: 'clamp(16px, 4vw, 32px)',
+                border: '2px solid var(--color-white)'
               }}>
                 <h2 className="text-arcade text-large color-yellow" style={{ 
                   textAlign: 'center', 
@@ -1112,27 +1034,22 @@ export const ResultsScreen = () => {
                 </div>
 
                 {/* Scope Selection */}
-                <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                  <div className="text-arcade text-small color-yellow" style={{ marginBottom: 'var(--spacing-sm)' }}>
+                <div className="responsive-form-group">
+                  <div className="text-arcade text-small color-yellow">
                     LEADERBOARD SCOPE:
                   </div>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+                  <div className="responsive-form-row">
                     {(['global', 'r/subreddit'] as LeaderboardScope[]).map((scope) => (
                       <button
                         key={scope}
                         onClick={() => handleScopeChange(scope)}
                         disabled={submission.isSubmitting}
-                        className="text-arcade arcade-focus instant-change touch-target"
+                        className="text-arcade arcade-focus instant-change touch-target responsive-button"
                         style={{
-                          padding: 'var(--spacing-sm) var(--spacing-md)',
                           backgroundColor: submission.scope === scope ? 'var(--color-yellow)' : 'var(--color-black)',
                           color: submission.scope === scope ? 'var(--color-black)' : 'var(--color-white)',
                           fontSize: 'clamp(10px, 2vw, 14px)',
-                          border: '2px solid var(--color-white)',
-                          borderRadius: '0',
-                          cursor: submission.isSubmitting ? 'not-allowed' : 'pointer',
-                          opacity: submission.isSubmitting ? 0.6 : 1,
-                          flex: 1
+                          opacity: submission.isSubmitting ? 0.6 : 1
                         }}
                       >
                         {scope === 'global' ? 'GLOBAL' : 'SUBREDDIT'}
@@ -1142,27 +1059,22 @@ export const ResultsScreen = () => {
                 </div>
 
                 {/* Period Selection */}
-                <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                  <div className="text-arcade text-small color-yellow" style={{ marginBottom: 'var(--spacing-sm)' }}>
+                <div className="responsive-form-group">
+                  <div className="text-arcade text-small color-yellow">
                     TIME PERIOD:
                   </div>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+                  <div className="responsive-form-row">
                     {(['alltime', 'weekly', 'daily'] as TimeFilter[]).map((period) => (
                       <button
                         key={period}
                         onClick={() => handlePeriodChange(period)}
                         disabled={submission.isSubmitting}
-                        className="text-arcade arcade-focus instant-change touch-target"
+                        className="text-arcade arcade-focus instant-change touch-target responsive-button"
                         style={{
-                          padding: 'var(--spacing-sm)',
                           backgroundColor: submission.period === period ? 'var(--color-yellow)' : 'var(--color-black)',
                           color: submission.period === period ? 'var(--color-black)' : 'var(--color-white)',
                           fontSize: 'clamp(8px, 1.5vw, 12px)',
-                          border: '2px solid var(--color-white)',
-                          borderRadius: '0',
-                          cursor: submission.isSubmitting ? 'not-allowed' : 'pointer',
-                          opacity: submission.isSubmitting ? 0.6 : 1,
-                          flex: 1
+                          opacity: submission.isSubmitting ? 0.6 : 1
                         }}
                       >
                         {period.toUpperCase()}

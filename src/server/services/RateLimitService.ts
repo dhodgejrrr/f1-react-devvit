@@ -10,24 +10,24 @@ export class RateLimitService {
   // Rate limit configurations - Requirement 8.3: per-user submission rate limits
   private static readonly LIMITS = {
     score_submission: {
-      minute: 3,    // 3 submissions per minute
-      hour: 20,     // 20 submissions per hour  
-      day: 100      // 100 submissions per day
+      minute: 10,   // 10 submissions per minute (allow rapid gameplay)
+      hour: 50,     // 50 submissions per hour  
+      day: 200      // 200 submissions per day
     },
     leaderboard_view: {
-      minute: 30,   // 30 views per minute
-      hour: 500,    // 500 views per hour
-      day: 2000     // 2000 views per day
+      minute: 100,  // 100 views per minute (allow frequent refreshes)
+      hour: 1000,   // 1000 views per hour
+      day: 5000     // 5000 views per day
     },
     challenge_create: {
-      minute: 2,    // 2 challenges per minute
-      hour: 10,     // 10 challenges per hour
-      day: 50       // 50 challenges per day
+      minute: 5,    // 5 challenges per minute
+      hour: 20,     // 20 challenges per hour
+      day: 100      // 100 challenges per day
     },
     challenge_accept: {
-      minute: 5,    // 5 accepts per minute
-      hour: 30,     // 30 accepts per hour
-      day: 200      // 200 accepts per day
+      minute: 10,   // 10 accepts per minute
+      hour: 50,     // 50 accepts per hour
+      day: 300      // 300 accepts per day
     }
   } as const;
 

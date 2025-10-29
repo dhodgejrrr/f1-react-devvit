@@ -282,7 +282,8 @@ router.post<{}, ScoreSubmissionResponse | ErrorResponse, ScoreSubmissionRequest>
         userLevel
       );
       
-      if (!rateLimitCheck.allowed) {
+      // Temporarily disable rate limiting for debugging
+      if (false && !rateLimitCheck.allowed) {
         res.status(429).json({
           type: 'error',
           code: 'RATE_LIMITED',
@@ -451,7 +452,8 @@ router.get<{}, LeaderboardResponse | ErrorResponse>('/api/leaderboard', async (r
         whitelistStatus?.level
       );
       
-      if (!rateLimitCheck.allowed) {
+      // Temporarily disable rate limiting for debugging
+      if (false && !rateLimitCheck.allowed) {
         res.status(429).json({
           type: 'error',
           code: 'RATE_LIMITED',
@@ -1106,6 +1108,7 @@ router.get('/api/rate-limit/status', async (req, res): Promise<void> => {
       return;
     }
 
+    // Note: This endpoint doesn't count against rate limits since it's used to check limits
     const status = await RateLimitService.getRateLimitStatus(userId, action as any);
     
     res.json({

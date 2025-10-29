@@ -27,17 +27,12 @@ export const ReadyScreen = () => {
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
+    <div className="responsive-container layout-stack safe-area-container" style={{
       minHeight: '100vh',
-      gap: '32px',
-      padding: '32px',
       backgroundColor: '#000000',
       color: '#ffffff',
-      fontFamily: '"Press Start 2P", monospace'
+      fontFamily: '"Press Start 2P", monospace',
+      justifyContent: 'center'
     }}>
       {/* Debug indicator */}
       <div style={{
@@ -52,9 +47,8 @@ export const ReadyScreen = () => {
       </div>
 
       {/* Status */}
-      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <h1 style={{
-          fontSize: 'clamp(32px, 6vw, 56px)',
+      <div className="layout-stack content-narrow" style={{ textAlign: 'center' }}>
+        <h1 className="text-responsive-hero" style={{
           color: '#ffff00',
           fontFamily: '"Press Start 2P", monospace',
           textTransform: 'uppercase',
@@ -62,8 +56,7 @@ export const ReadyScreen = () => {
           margin: 0,
           fontWeight: 'bold'
         }}>READY TO START</h1>
-        <div style={{
-          fontSize: 'clamp(16px, 4vw, 24px)',
+        <div className="text-responsive-large" style={{
           color: '#ffffff',
           fontFamily: '"Press Start 2P", monospace',
           textTransform: 'uppercase',
@@ -72,48 +65,43 @@ export const ReadyScreen = () => {
       </div>
 
       {/* Instructions */}
-      <div style={{ textAlign: 'center', maxWidth: '600px' }}>
+      <div className="content-wide" style={{ textAlign: 'center' }}>
         <div style={{
           backgroundColor: '#333333',
-          padding: '24px',
+          padding: 'clamp(16px, 4vw, 24px)',
           border: '2px solid #ffff00',
           borderRadius: '0'
         }}>
-          <h3 style={{
-            fontSize: 'clamp(16px, 3vw, 20px)',
+          <h3 className="text-responsive-large" style={{
             color: '#ffff00',
             fontFamily: '"Press Start 2P", monospace',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
-            marginBottom: '16px'
+            marginBottom: 'clamp(8px, 2vw, 16px)'
           }}>INSTRUCTIONS:</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <p style={{
-              fontSize: 'clamp(12px, 2.5vw, 16px)',
+          <div className="layout-stack gap-responsive-sm">
+            <p className="text-responsive-medium" style={{
               color: '#ffffff',
               fontFamily: '"Press Start 2P", monospace',
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
               margin: 0
             }}>1. FIVE RED LIGHTS WILL ILLUMINATE ONE BY ONE</p>
-            <p style={{
-              fontSize: 'clamp(12px, 2.5vw, 16px)',
+            <p className="text-responsive-medium" style={{
               color: '#ffffff',
               fontFamily: '"Press Start 2P", monospace',
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
               margin: 0
             }}>2. WAIT FOR ALL LIGHTS TO GO OUT SIMULTANEOUSLY</p>
-            <p style={{
-              fontSize: 'clamp(12px, 2.5vw, 16px)',
+            <p className="text-responsive-medium" style={{
               color: '#ffffff',
               fontFamily: '"Press Start 2P", monospace',
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
               margin: 0
             }}>3. CLICK ANYWHERE OR PRESS SPACEBAR TO REACT</p>
-            <p style={{
-              fontSize: 'clamp(12px, 2.5vw, 16px)',
+            <p className="text-responsive-medium" style={{
               color: '#ffffff',
               fontFamily: '"Press Start 2P", monospace',
               textTransform: 'uppercase',
@@ -125,38 +113,31 @@ export const ReadyScreen = () => {
       </div>
 
       {/* Light Preview */}
-      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
+      <div className="f1-lights-responsive">
         {Array.from({ length: 5 }, (_, index) => (
           <div
             key={index}
-            style={{
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              backgroundColor: '#333333',
-              border: '2px solid #ffffff'
-            }}
+            className="f1-light-responsive"
           />
         ))}
       </div>
 
       {/* Action Buttons */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+      <div className="content-narrow layout-stack">
         <button
           onClick={handleStartGame}
           disabled={loading}
+          className="responsive-button"
           style={{
-            padding: '24px 32px',
             backgroundColor: '#00ff00',
             color: '#000000',
             fontSize: 'clamp(16px, 4vw, 24px)',
-            border: '2px solid #ffffff',
-            borderRadius: '0',
-            cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1,
             fontFamily: '"Press Start 2P", monospace',
             textTransform: 'uppercase',
-            letterSpacing: '0.1em'
+            letterSpacing: '0.1em',
+            width: '100%',
+            maxWidth: '400px'
           }}
         >
           {loading ? 'STARTING...' : 'START SEQUENCE'}
@@ -164,17 +145,16 @@ export const ReadyScreen = () => {
 
         <button
           onClick={handleBackToMenu}
+          className="responsive-button"
           style={{
-            padding: '16px 24px',
             backgroundColor: '#000000',
             color: '#ffffff',
             fontSize: 'clamp(12px, 3vw, 16px)',
-            border: '2px solid #ffffff',
-            borderRadius: '0',
-            cursor: 'pointer',
             fontFamily: '"Press Start 2P", monospace',
             textTransform: 'uppercase',
-            letterSpacing: '0.1em'
+            letterSpacing: '0.1em',
+            width: '100%',
+            maxWidth: '300px'
           }}
         >
           BACK TO MENU
@@ -182,9 +162,8 @@ export const ReadyScreen = () => {
       </div>
 
       {/* Tips */}
-      <div style={{ textAlign: 'center', maxWidth: '500px' }}>
-        <p style={{
-          fontSize: 'clamp(8px, 2vw, 12px)',
+      <div className="content-narrow" style={{ textAlign: 'center' }}>
+        <p className="text-responsive-small" style={{
           color: '#ffffff',
           fontFamily: '"Press Start 2P", monospace',
           textTransform: 'uppercase',
@@ -193,8 +172,7 @@ export const ReadyScreen = () => {
         }}>
           TIP: PROFESSIONAL F1 DRIVERS AVERAGE 200-300MS REACTION TIME
         </p>
-        <p style={{
-          fontSize: 'clamp(8px, 2vw, 12px)',
+        <p className="text-responsive-small" style={{
           color: '#ffffff',
           fontFamily: '"Press Start 2P", monospace',
           textTransform: 'uppercase',

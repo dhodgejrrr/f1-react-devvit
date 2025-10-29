@@ -245,130 +245,101 @@ export const LeaderboardScreen = () => {
   };
 
   return (
-    <div className="arcade-container" style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
-      justifyContent: 'flex-start', 
-      minHeight: '100vh', 
-      gap: 'var(--spacing-lg)', 
-      padding: 'var(--spacing-lg)',
+    <div className="responsive-container layout-stack safe-area-container" style={{ 
+      minHeight: '100vh',
       overflowY: 'auto'
     }}>
       {/* Header */}
-      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--spacing-md)' }}>
+      <div className="content-container" style={{ textAlign: 'center' }}>
+        <div className="layout-inline" style={{ justifyContent: 'space-between', marginBottom: 'var(--spacing-md)' }}>
           <button
             onClick={() => dispatch({ type: 'TRANSITION_STATE', payload: GameState.SPLASH })}
-            className="text-arcade arcade-focus instant-change touch-target"
+            className="text-arcade arcade-focus instant-change touch-target responsive-button"
             style={{
-              padding: 'var(--spacing-sm) var(--spacing-md)',
               backgroundColor: 'var(--color-black)',
               color: 'var(--color-white)',
-              fontSize: 'clamp(10px, 2vw, 14px)',
-              border: '2px solid var(--color-white)',
-              borderRadius: '0',
-              cursor: 'pointer'
+              fontSize: 'clamp(10px, 2vw, 14px)'
             }}
           >
             ← BACK
           </button>
-          <h1 className="text-arcade text-hero color-yellow">LEADERBOARD</h1>
+          <h1 className="text-responsive-hero color-yellow">LEADERBOARD</h1>
           <button
             onClick={handleRetry}
             disabled={leaderboard.loading}
             aria-label="Refresh leaderboard"
-            className="text-arcade arcade-focus instant-change touch-target"
+            className="text-arcade arcade-focus instant-change touch-target responsive-button"
             style={{
-              padding: 'var(--spacing-xs)',
               backgroundColor: 'var(--color-black)',
               color: 'var(--color-white)',
               fontSize: 'clamp(8px, 1.5vw, 12px)',
-              border: '1px solid var(--color-white)',
-              borderRadius: '0',
-              cursor: leaderboard.loading ? 'not-allowed' : 'pointer',
               opacity: leaderboard.loading ? 0.6 : 1,
-              minWidth: '40px',
-              height: '32px'
+              minWidth: '44px'
             }}
           >
             🔄
           </button>
         </div>
-        <div className="text-arcade text-large color-white">
+        <div className="text-responsive-large color-white">
           {filters.scope === 'global' ? 'GLOBAL' : filters.scope.toUpperCase()} - {filters.period.toUpperCase()}
         </div>
         {leaderboard.stats.totalEntries > 0 && (
-          <div className="text-arcade text-small color-white">
+          <div className="text-responsive-small color-white">
             {leaderboard.stats.totalEntries} PLAYERS • AVG: {Math.round(leaderboard.stats.averageTime)}MS
           </div>
         )}
       </div>
 
       {/* Filter Buttons */}
-      <div 
-        role="group" 
-        aria-label="Leaderboard filters"
-        style={{ 
-          display: 'flex', 
-          flexWrap: 'wrap', 
-          gap: 'var(--spacing-sm)', 
-          justifyContent: 'center',
-          maxWidth: '100%'
-        }}
-      >
-        {/* Time Period Filters */}
-        <div role="group" aria-label="Time period filters" style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
-          {(['alltime', 'weekly', 'daily'] as TimeFilter[]).map((period) => (
-            <button 
-              key={period}
-              onClick={() => handleFilterChange(undefined, period)}
-              disabled={leaderboard.loading}
-              aria-pressed={filters.period === period}
-              aria-label={`Filter by ${period} scores`}
-              className="text-arcade arcade-focus instant-change touch-target"
-              style={{
-                padding: 'clamp(6px, 1.5vw, var(--spacing-sm)) clamp(8px, 2vw, var(--spacing-md))',
-                backgroundColor: filters.period === period ? 'var(--color-yellow)' : 'var(--color-black)',
-                color: filters.period === period ? 'var(--color-black)' : 'var(--color-white)',
-                fontSize: 'clamp(8px, 2vw, 14px)',
-                border: '2px solid var(--color-white)',
-                borderRadius: '0',
-                cursor: leaderboard.loading ? 'not-allowed' : 'pointer',
-                opacity: leaderboard.loading ? 0.6 : 1,
-                minWidth: '60px'
-              }}
-            >
-              {period.toUpperCase()}
-            </button>
-          ))}
-        </div>
-        
-        {/* Scope Filters */}
-        <div role="group" aria-label="Scope filters" style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
-          {(['global', 'r/subreddit'] as LeaderboardScope[]).map((scope) => (
-            <button 
-              key={scope}
-              onClick={() => handleFilterChange(scope, undefined)}
-              disabled={leaderboard.loading}
-              aria-pressed={filters.scope === scope}
-              aria-label={`Filter by ${scope === 'global' ? 'global' : 'subreddit'} scores`}
-              className="text-arcade arcade-focus instant-change touch-target"
-              style={{
-                padding: 'clamp(6px, 1.5vw, var(--spacing-sm)) clamp(8px, 2vw, var(--spacing-md))',
-                backgroundColor: filters.scope === scope ? 'var(--color-green)' : 'var(--color-black)',
-                color: filters.scope === scope ? 'var(--color-black)' : 'var(--color-white)',
-                fontSize: 'clamp(8px, 2vw, 14px)',
-                border: '2px solid var(--color-white)',
-                borderRadius: '0',
-                cursor: leaderboard.loading ? 'not-allowed' : 'pointer',
-                opacity: leaderboard.loading ? 0.6 : 1,
-                minWidth: '80px'
-              }}
-            >
-              {scope === 'global' ? 'GLOBAL' : 'SUBREDDIT'}
-            </button>
-          ))}
+      <div className="content-container">
+        <div 
+          role="group" 
+          aria-label="Leaderboard filters"
+          className="layout-stack"
+        >
+          {/* Time Period Filters */}
+          <div role="group" aria-label="Time period filters" className="responsive-form-row">
+            {(['alltime', 'weekly', 'daily'] as TimeFilter[]).map((period) => (
+              <button 
+                key={period}
+                onClick={() => handleFilterChange(undefined, period)}
+                disabled={leaderboard.loading}
+                aria-pressed={filters.period === period}
+                aria-label={`Filter by ${period} scores`}
+                className="text-arcade arcade-focus instant-change touch-target responsive-button"
+                style={{
+                  backgroundColor: filters.period === period ? 'var(--color-yellow)' : 'var(--color-black)',
+                  color: filters.period === period ? 'var(--color-black)' : 'var(--color-white)',
+                  fontSize: 'clamp(8px, 2vw, 14px)',
+                  opacity: leaderboard.loading ? 0.6 : 1
+                }}
+              >
+                {period.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          
+          {/* Scope Filters */}
+          <div role="group" aria-label="Scope filters" className="responsive-form-row">
+            {(['global', 'r/subreddit'] as LeaderboardScope[]).map((scope) => (
+              <button 
+                key={scope}
+                onClick={() => handleFilterChange(scope, undefined)}
+                disabled={leaderboard.loading}
+                aria-pressed={filters.scope === scope}
+                aria-label={`Filter by ${scope === 'global' ? 'global' : 'subreddit'} scores`}
+                className="text-arcade arcade-focus instant-change touch-target responsive-button"
+                style={{
+                  backgroundColor: filters.scope === scope ? 'var(--color-green)' : 'var(--color-black)',
+                  color: filters.scope === scope ? 'var(--color-black)' : 'var(--color-white)',
+                  fontSize: 'clamp(8px, 2vw, 14px)',
+                  opacity: leaderboard.loading ? 0.6 : 1
+                }}
+              >
+                {scope === 'global' ? 'GLOBAL' : 'SUBREDDIT'}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -462,15 +433,11 @@ export const LeaderboardScreen = () => {
       {/* Leaderboard Table */}
       {!leaderboard.loading && !leaderboard.error && leaderboard.entries.length > 0 && (
         <div 
-          className="arcade-container" 
+          className="content-wide responsive-table-container" 
           role="region"
           aria-label="Leaderboard table"
           style={{
-            width: '100%',
-            maxWidth: '800px',
-            backgroundColor: 'var(--color-black)',
-            border: '2px solid var(--color-white)',
-            overflow: 'hidden'
+            backgroundColor: 'var(--color-black)'
           }}
         >
           <div style={{
@@ -506,11 +473,7 @@ export const LeaderboardScreen = () => {
               role="table"
               aria-labelledby="leaderboard-title"
               aria-describedby="leaderboard-description"
-              style={{ 
-                width: '100%', 
-                borderCollapse: 'collapse',
-                minWidth: '320px' // Ensure minimum width for mobile
-              }}
+              className="responsive-table"
             >
               <caption 
                 id="leaderboard-description" 
@@ -915,18 +878,15 @@ export const LeaderboardScreen = () => {
       </div>
 
       {/* Action Buttons */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', alignItems: 'center' }}>
+      <div className="content-narrow layout-stack">
         <button
           onClick={handlePlayGame}
-          className="text-arcade arcade-focus instant-change touch-target"
+          className="text-arcade arcade-focus instant-change touch-target responsive-button"
           style={{
-            padding: 'var(--spacing-md) var(--spacing-xl)',
             backgroundColor: 'var(--color-green)',
             color: 'var(--color-black)',
             fontSize: 'clamp(16px, 3vw, 20px)',
-            border: '2px solid var(--color-white)',
-            borderRadius: '0',
-            cursor: 'pointer'
+            width: '100%'
           }}
         >
           PLAY GAME
@@ -934,15 +894,12 @@ export const LeaderboardScreen = () => {
 
         <button
           onClick={handleBackToMenu}
-          className="text-arcade arcade-focus instant-change touch-target"
+          className="text-arcade arcade-focus instant-change touch-target responsive-button"
           style={{
-            padding: 'var(--spacing-md) var(--spacing-xl)',
             backgroundColor: 'var(--color-black)',
             color: 'var(--color-white)',
             fontSize: 'clamp(16px, 3vw, 20px)',
-            border: '2px solid var(--color-white)',
-            borderRadius: '0',
-            cursor: 'pointer'
+            width: '100%'
           }}
         >
           MAIN MENU

@@ -118,20 +118,15 @@ export const GameScreen = () => {
 
   return (
     <div 
+      className="layout-stack content-container"
       style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        minHeight: '100vh', 
-        gap: '32px', 
-        padding: '24px',
+        minHeight: '100vh',
+        justifyContent: 'center',
         cursor: gamePhase === 'waiting' ? 'pointer' : 'default'
       }}
       onClick={handleReaction}
     >
-      <h1 style={{ 
-        fontSize: 'clamp(24px, 5vw, 48px)', 
+      <h1 className="text-responsive-hero" style={{ 
         color: gamePhase === 'waiting' ? '#00ff00' : '#ffffff',
         textAlign: 'center',
         fontFamily: '"Press Start 2P", monospace',
@@ -145,34 +140,31 @@ export const GameScreen = () => {
       </h1>
 
       {/* F1 Starting Lights */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '24px', 
-        padding: '32px',
+      <div className="content-container" style={{ 
         backgroundColor: '#1a1a1a',
-        border: '2px solid #ffffff'
+        border: '2px solid #ffffff',
+        borderRadius: '0',
+        maxWidth: '100%'
       }}>
-        {lights.map((isOn, index) => (
-          <div
-            key={index}
-            style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '50%',
-              backgroundColor: isOn ? '#ff0000' : '#333333',
-              border: '2px solid #ffffff',
-              boxShadow: isOn ? '0 0 20px #ff0000' : 'none',
-              transition: 'all 0.1s ease'
-            }}
-          />
-        ))}
+        <div className="f1-lights-responsive">
+          {lights.map((isOn, index) => (
+            <div
+              key={index}
+              className="f1-light-responsive"
+              style={{
+                backgroundColor: isOn ? '#ff0000' : '#333333',
+                boxShadow: isOn ? '0 0 clamp(10px, 3vw, 20px) #ff0000' : 'none',
+                transition: 'all 0.1s ease'
+              }}
+            />
+          ))}
+        </div>
       </div>
 
-      <div style={{ textAlign: 'center' }}>
+      <div className="content-narrow" style={{ textAlign: 'center' }}>
         {gamePhase === 'sequence' && (
-          <p style={{ 
-            color: '#ff0000', 
-            fontSize: '18px',
+          <p className="text-responsive-medium" style={{ 
+            color: '#ff0000',
             fontFamily: '"Press Start 2P", monospace',
             textTransform: 'uppercase',
             letterSpacing: '0.1em'
@@ -181,9 +173,8 @@ export const GameScreen = () => {
           </p>
         )}
         {gamePhase === 'waiting' && (
-          <p style={{ 
-            color: '#00ff00', 
-            fontSize: '18px',
+          <p className="text-responsive-medium" style={{ 
+            color: '#00ff00',
             fontFamily: '"Press Start 2P", monospace',
             textTransform: 'uppercase',
             letterSpacing: '0.1em'

@@ -36,17 +36,12 @@ export const SplashScreen = () => {
   console.log('SplashScreen - about to render JSX');
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
+    <div className="layout-stack content-container" style={{
       minHeight: '100vh',
-      gap: '32px',
-      padding: '24px',
       backgroundColor: '#ff0000',
       color: '#ffffff',
-      position: 'relative'
+      position: 'relative',
+      justifyContent: 'center'
     }}>
       {/* Debug indicator */}
       <div style={{
@@ -61,9 +56,8 @@ export const SplashScreen = () => {
       </div>
 
       {/* Main Title */}
-      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <h1 style={{
-          fontSize: 'clamp(24px, 5vw, 48px)',
+      <div className="layout-stack" style={{ textAlign: 'center' }}>
+        <h1 className="text-responsive-hero" style={{
           color: '#ffff00',
           fontFamily: '"Press Start 2P", "Courier New", monospace',
           textTransform: 'uppercase',
@@ -71,8 +65,7 @@ export const SplashScreen = () => {
           margin: 0,
           fontWeight: 'bold'
         }}>F1 START</h1>
-        <h2 style={{
-          fontSize: 'clamp(24px, 5vw, 48px)',
+        <h2 className="text-responsive-hero" style={{
           color: '#ffffff',
           fontFamily: '"Press Start 2P", "Courier New", monospace',
           textTransform: 'uppercase',
@@ -83,17 +76,15 @@ export const SplashScreen = () => {
       </div>
 
       {/* Subtitle */}
-      <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <p style={{
-          fontSize: 'clamp(16px, 3vw, 24px)',
+      <div className="layout-stack" style={{ textAlign: 'center' }}>
+        <p className="text-responsive-large" style={{
           color: '#ffffff',
           fontFamily: '"Press Start 2P", monospace',
           textTransform: 'uppercase',
           letterSpacing: '0.1em',
           margin: 0
         }}>TEST YOUR REACTION TIME</p>
-        <p style={{
-          fontSize: 'clamp(12px, 2.5vw, 16px)',
+        <p className="text-responsive-medium" style={{
           color: '#ffffff',
           fontFamily: '"Press Start 2P", monospace',
           textTransform: 'uppercase',
@@ -103,59 +94,51 @@ export const SplashScreen = () => {
       </div>
 
       {/* Visual Elements - F1 Lights Preview */}
-      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
+      <div className="f1-lights-responsive">
         {Array.from({ length: 5 }, (_, index) => (
           <div
             key={index}
-            style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '50%',
-              backgroundColor: '#333333',
-              border: '2px solid #ffffff'
-            }}
+            className="f1-light-responsive"
           />
         ))}
       </div>
 
       {/* Action Buttons */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+      <div className="layout-stack content-narrow">
         {/* Start Button */}
         <button
           onClick={handleStart}
           disabled={loading}
+          className="responsive-button"
           style={{
-            padding: '24px 32px',
             backgroundColor: '#000000',
             color: '#ffffff',
             fontSize: 'clamp(16px, 4vw, 24px)',
-            border: '2px solid #ffffff',
-            borderRadius: '0',
-            cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1,
             fontFamily: '"Press Start 2P", monospace',
             textTransform: 'uppercase',
-            letterSpacing: '0.1em'
+            letterSpacing: '0.1em',
+            width: '100%',
+            maxWidth: '400px'
           }}
         >
           {loading ? 'INITIALIZING...' : 'PRESS START'}
         </button>
 
         {/* Navigation Buttons */}
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div className="layout-inline">
           <button
             onClick={handleLeaderboard}
+            className="responsive-button"
             style={{
-              padding: '16px 24px',
               backgroundColor: '#000000',
               color: '#ffff00',
               fontSize: 'clamp(12px, 3vw, 16px)',
               border: '2px solid #ffff00',
-              borderRadius: '0',
-              cursor: 'pointer',
               fontFamily: '"Press Start 2P", monospace',
               textTransform: 'uppercase',
-              letterSpacing: '0.1em'
+              letterSpacing: '0.1em',
+              minWidth: '150px'
             }}
           >
             LEADERBOARD
@@ -164,9 +147,8 @@ export const SplashScreen = () => {
       </div>
 
       {/* Instructions */}
-      <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-        <p style={{
-          fontSize: 'clamp(8px, 2vw, 12px)',
+      <div className="content-narrow" style={{ textAlign: 'center' }}>
+        <p className="text-responsive-small" style={{
           color: '#ffffff',
           fontFamily: '"Press Start 2P", monospace',
           textTransform: 'uppercase',
@@ -175,8 +157,7 @@ export const SplashScreen = () => {
         }}>
           WAIT FOR ALL FIVE LIGHTS TO GO OUT
         </p>
-        <p style={{
-          fontSize: 'clamp(8px, 2vw, 12px)',
+        <p className="text-responsive-small" style={{
           color: '#ffffff',
           fontFamily: '"Press Start 2P", monospace',
           textTransform: 'uppercase',

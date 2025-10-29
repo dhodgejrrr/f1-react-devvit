@@ -6,6 +6,8 @@ import { ReadyScreen } from './screens/ReadyScreen.js';
 import { LeaderboardScreen } from './screens/LeaderboardScreen.js';
 import { GameScreen } from './screens/GameScreen.js';
 import { ResultsScreen } from './screens/ResultsScreen.js';
+import { ResponsiveTest } from './ui/ResponsiveTest.js';
+import { F1LightsTest } from './ui/F1LightsTest.js';
 
 export const GameRouter = () => {
   console.log('GameRouter: Component starting to render');
@@ -24,7 +26,7 @@ export const GameRouter = () => {
   // Removed renderCurrentScreen function - using inline rendering instead
 
     return (
-      <div style={{ 
+      <div className="responsive-container safe-area-container" style={{ 
         minHeight: '100vh',
         backgroundColor: '#000000',
         color: '#ffffff',
@@ -40,24 +42,25 @@ export const GameRouter = () => {
           }}
           aria-label="Open accessibility settings"
           title="Accessibility Settings"
+          className="responsive-button"
           style={{
             position: 'fixed',
-            top: '16px',
-            right: '16px',
+            top: 'max(env(safe-area-inset-top), 16px)',
+            right: 'max(env(safe-area-inset-right), 16px)',
             zIndex: 1000,
             backgroundColor: '#000000',
             border: '2px solid #ffffff',
             color: '#ffffff',
-            padding: '8px',
-            fontSize: '16px',
-            cursor: 'pointer'
+            minWidth: '44px',
+            minHeight: '44px',
+            fontSize: 'clamp(14px, 3vw, 18px)'
           }}
         >
           ♿
         </button>
 
         {/* Main Content */}
-        <main role="main">
+        <main role="main" className="content-container">
           {/* Simple screen rendering based on state */}
           {state.currentState === GameState.SPLASH && <SplashScreen />}
           {state.currentState === GameState.READY && <ReadyScreen />}
@@ -86,6 +89,14 @@ export const GameRouter = () => {
           {state.error && `Error: ${state.error}`}
           {state.loading && 'Loading...'}
         </div>
+
+        {/* Responsive Design Test Components (Development Only) */}
+        {process.env.NODE_ENV === 'development' && (
+          <>
+            <ResponsiveTest />
+            <F1LightsTest />
+          </>
+        )}
       </div>
     );
   } catch (error) {
