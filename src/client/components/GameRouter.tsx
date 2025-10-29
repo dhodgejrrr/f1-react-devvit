@@ -68,12 +68,15 @@ export const GameRouter = () => {
           {(state.currentState === GameState.LIGHTS_SEQUENCE || state.currentState === GameState.WAITING_FOR_INPUT) && <GameScreen />}
           {state.currentState === GameState.SHOWING_RESULTS && <ResultsScreen />}
           
+          {/* Handle CHALLENGE state */}
+          {state.currentState === GameState.CHALLENGE && <GameScreen />}
+          
           {/* Fallback for unknown states */}
-          {!['SPLASH', 'READY', 'LEADERBOARD', 'LIGHTS_SEQUENCE', 'WAITING_FOR_INPUT', 'SHOWING_RESULTS'].includes(state.currentState) && (
+          {!['SPLASH', 'READY', 'LEADERBOARD', 'LIGHTS_SEQUENCE', 'WAITING_FOR_INPUT', 'SHOWING_RESULTS', 'CHALLENGE'].includes(state.currentState) && (
             <div style={{ 
               minHeight: '100vh', 
-              backgroundColor: '#ff0000', 
-              color: 'white', 
+              backgroundColor: '#000000', 
+              color: '#ffffff', 
               padding: '20px',
               display: 'flex',
               alignItems: 'center',
@@ -104,7 +107,7 @@ export const GameRouter = () => {
     return (
       <div style={{ 
         minHeight: '100vh',
-        backgroundColor: '#ff0000',
+        backgroundColor: '#000000',
         color: '#ffffff',
         padding: '20px',
         fontSize: '16px'

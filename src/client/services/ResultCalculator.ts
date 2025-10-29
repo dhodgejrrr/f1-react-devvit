@@ -190,7 +190,7 @@ export class ResultCalculator {
     const isPersonalBest = this.isPersonalBest(reactionTime, userHistory);
 
     return {
-      reactionTime: Math.round(reactionTime),
+      reactionTime: Math.round(reactionTime * 1000) / 1000,
       rating,
       driverComparison,
       communityPercentile,
@@ -380,7 +380,7 @@ export class ResultCalculator {
     );
 
     return {
-      message: `${Math.round(reactionTime - fastestDriver.avgReactionTime)}ms behind ${fastestDriver.name}`,
+      message: `${(Math.round((reactionTime - fastestDriver.avgReactionTime) * 1000) / 1000)}ms behind ${fastestDriver.name}`,
       icon: '🚗',
       color: this.config.colors.slow,
     };

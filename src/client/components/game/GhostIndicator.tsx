@@ -103,7 +103,7 @@ export const GhostIndicator: React.FC<GhostIndicatorProps> = ({
           <div className="comparison-grid">
             <div className="player-result user">
               <div className="player-label">YOU</div>
-              <div className="player-time">{userReactionTime}ms</div>
+              <div className="player-time">{userReactionTime.toFixed(3)}ms</div>
               <div className={`player-status ${getWinner() === 'user' ? 'winner' : getWinner() === 'tie' ? 'tie' : 'loser'}`}>
                 {getWinner() === 'user' ? '🏆 WINNER' : 
                  getWinner() === 'tie' ? '🤝 TIE' : 

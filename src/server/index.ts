@@ -361,14 +361,6 @@ router.post<{}, ScoreSubmissionResponse | ErrorResponse, ScoreSubmissionRequest>
         return;
       }
 
-      // Record the rate limit action before processing
-      await RateLimitService.recordAction(userId, 'score_submission');
-      
-      // Record IP action for tracking
-      if (ipAddress && ipAddress !== 'unknown') {
-        await RateLimitService.recordIPAction(ipAddress, 'score_submission');
-      }
-
       // Submit score with error handling
       const result = await ErrorHandlingService.executeWithRetry(
         async () => {
@@ -382,6 +374,13 @@ router.post<{}, ScoreSubmissionResponse | ErrorResponse, ScoreSubmissionRequest>
       );
 
       if (result.success && result.data) {
+        // Only record the rate limit action after successful submission
+        await RateLimitService.recordAction(userId, 'score_submission');
+        
+        // Record IP action for tracking
+        if (ipAddress && ipAddress !== 'unknown') {
+          await RateLimitService.recordIPAction(ipAddress, 'score_submission');
+        }
         // Update user session stats
         const sessionStats = await UserSessionService.updateSessionStats(
           userId,
@@ -464,8 +463,6 @@ router.get<{}, LeaderboardResponse | ErrorResponse>('/api/leaderboard', async (r
         return;
       }
 
-      // Record the rate limit action
-      await RateLimitService.recordAction(userId, 'leaderboard_view');
     }
     
     const result = await ErrorHandlingService.executeWithRetry(
@@ -491,6 +488,11 @@ router.get<{}, LeaderboardResponse | ErrorResponse>('/api/leaderboard', async (r
     );
 
     if (result.success && result.data) {
+      // Only record the rate limit action after successful fetch
+      if (userId) {
+        await RateLimitService.recordAction(userId, 'leaderboard_view');
+      }
+      
       res.json(result.data);
     } else {
       res.status(500).json({
@@ -1490,22 +1492,52 @@ router.post<{}, ChallengeCreateResponse | ErrorResponse, ChallengeCreateRequest>
 
       // Check rate limiting for challenge creation
       const whitelistStatus = await RateLimitService.getWhitelistStatus(username);
-      const rateLimitCheck = await RateLimitService.checkRateLimit(
+      let rateLimitCheck = await RateLimitService.checkRateLimit(
         username, 
         'challenge_create', 
         ipAddress, 
         whitelistStatus?.level
       );
       
+      // If rate limited, check if this might be due to old failed attempts
+      // and automatically clear recent actions as a recovery mechanism
       if (!rateLimitCheck.allowed) {
-        res.status(429).json({
-          type: 'error',
-          code: 'RATE_LIMITED',
-          message: RateLimitService.getRateLimitMessage(rateLimitCheck, 'challenge creation'),
-          recoverable: true,
-          action: 'wait'
-        });
-        return;
+        console.log(`Rate limit hit for ${username}, attempting recovery...`);
+        await RateLimitService.clearRecentActions(username, 'challenge_create', 10);
+        
+        // Check again after clearing recent actions
+        rateLimitCheck = await RateLimitService.checkRateLimit(
+          username, 
+          'challenge_create', 
+          ipAddress, 
+          whitelistStatus?.level
+        );
+        
+        // If still rate limited after clearing recent actions, 
+        // this is likely due to old failed attempts, so reset completely as recovery
+        if (!rateLimitCheck.allowed) {
+          console.log(`Still rate limited for ${username}, performing full reset as recovery`);
+          await RateLimitService.resetRateLimit(username);
+          
+          // Final check after reset
+          rateLimitCheck = await RateLimitService.checkRateLimit(
+            username, 
+            'challenge_create', 
+            ipAddress, 
+            whitelistStatus?.level
+          );
+          
+          if (!rateLimitCheck.allowed) {
+            res.status(429).json({
+              type: 'error',
+              code: 'RATE_LIMITED',
+              message: RateLimitService.getRateLimitMessage(rateLimitCheck, 'challenge creation'),
+              recoverable: true,
+              action: 'wait'
+            });
+            return;
+          }
+        }
       }
 
       // Validate reaction time
@@ -1518,12 +1550,6 @@ router.post<{}, ChallengeCreateResponse | ErrorResponse, ChallengeCreateRequest>
           action: 'retry'
         });
         return;
-      }
-
-      // Record the rate limit action
-      await RateLimitService.recordAction(username, 'challenge_create');
-      if (ipAddress && ipAddress !== 'unknown') {
-        await RateLimitService.recordIPAction(ipAddress, 'challenge_create');
       }
 
       const challengeService = new ChallengeService(context);
@@ -1540,6 +1566,12 @@ router.post<{}, ChallengeCreateResponse | ErrorResponse, ChallengeCreateRequest>
       );
 
       if (result.success && result.data) {
+        // Only record the rate limit action after successful creation
+        await RateLimitService.recordAction(username, 'challenge_create');
+        if (ipAddress && ipAddress !== 'unknown') {
+          await RateLimitService.recordIPAction(ipAddress, 'challenge_create');
+        }
+
         res.json({
           type: 'challenge_create',
           success: true,
@@ -1666,12 +1698,6 @@ router.post<{}, ChallengeAcceptResponse | ErrorResponse, ChallengeAcceptRequest>
         return;
       }
 
-      // Record the rate limit action
-      await RateLimitService.recordAction(username, 'challenge_accept');
-      if (ipAddress && ipAddress !== 'unknown') {
-        await RateLimitService.recordIPAction(ipAddress, 'challenge_accept');
-      }
-
       const challengeService = new ChallengeService(context);
       
       const result = await ErrorHandlingService.executeWithRetry(
@@ -1686,6 +1712,12 @@ router.post<{}, ChallengeAcceptResponse | ErrorResponse, ChallengeAcceptRequest>
       );
 
       if (result.success && result.data) {
+        // Only record the rate limit action after successful acceptance
+        await RateLimitService.recordAction(username, 'challenge_accept');
+        if (ipAddress && ipAddress !== 'unknown') {
+          await RateLimitService.recordIPAction(ipAddress, 'challenge_accept');
+        }
+
         res.json({
           type: 'challenge_accept',
           success: true,
@@ -1958,6 +1990,53 @@ router.post('/api/challenge/synchronize', async (req, res): Promise<void> => {
       type: 'error',
       code: 'SYNC_ERROR',
       message: 'Failed to synchronize timing',
+      recoverable: true,
+      action: 'retry'
+    });
+  }
+});
+
+// Rate limit management endpoint (for testing/admin)
+router.post('/api/admin/reset-rate-limit', async (req, res): Promise<void> => {
+  try {
+    const { userId } = req.body;
+    const username = await reddit.getCurrentUsername();
+    
+    if (!username || !userId) {
+      res.status(400).json({
+        type: 'error',
+        code: 'INVALID_REQUEST',
+        message: 'Username and userId required',
+        recoverable: false,
+        action: 'retry'
+      });
+      return;
+    }
+
+    const success = await RateLimitService.resetRateLimit(userId);
+    
+    if (success) {
+      res.json({
+        type: 'admin_action',
+        success: true,
+        message: `Rate limits reset for user ${userId}`
+      });
+    } else {
+      res.status(500).json({
+        type: 'error',
+        code: 'RESET_FAILED',
+        message: 'Failed to reset rate limits',
+        recoverable: true,
+        action: 'retry'
+      });
+    }
+
+  } catch (error) {
+    console.error('Rate limit reset error:', error);
+    res.status(500).json({
+      type: 'error',
+      code: 'RESET_ERROR',
+      message: 'Failed to reset rate limits',
       recoverable: true,
       action: 'retry'
     });

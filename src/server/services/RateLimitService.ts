@@ -8,7 +8,7 @@ import type { RateLimitResult } from '../../shared/types/leaderboard.js';
  */
 export class RateLimitService {
   // Rate limit configurations - Requirement 8.3: per-user submission rate limits
-  private static readonly LIMITS = {
+  public static readonly LIMITS = {
     score_submission: {
       minute: 10,   // 10 submissions per minute (allow rapid gameplay)
       hour: 50,     // 50 submissions per hour  
@@ -55,7 +55,7 @@ export class RateLimitService {
   } as const;
 
   // Whitelist system - Requirement 8.3: Implement whitelist system for verified users
-  private static readonly WHITELIST_MULTIPLIERS = {
+  public static readonly WHITELIST_MULTIPLIERS = {
     verified: 2,    // 2x higher limits for verified users
     moderator: 5,   // 5x higher limits for moderators
     admin: 10       // 10x higher limits for admins
@@ -87,13 +87,13 @@ export class RateLimitService {
       }
       
       // Get base limits and apply whitelist multipliers
-      let limits = { ...RateLimitService.LIMITS[action] };
+      let limits: UsageCounts = { ...RateLimitService.LIMITS[action] };
       if (userLevel && RateLimitService.WHITELIST_MULTIPLIERS[userLevel]) {
         const multiplier = RateLimitService.WHITELIST_MULTIPLIERS[userLevel];
         limits = {
-          minute: limits.minute * multiplier,
-          hour: limits.hour * multiplier,
-          day: limits.day * multiplier
+          minute: Math.floor(limits.minute * multiplier),
+          hour: Math.floor(limits.hour * multiplier),
+          day: Math.floor(limits.day * multiplier)
         };
       }
       
@@ -238,9 +238,54 @@ export class RateLimitService {
   static async resetRateLimit(userId: string): Promise<boolean> {
     try {
       const rateLimitKey = KVStorageService.keys.rateLimit(userId);
-      return await KVStorageService.delete(rateLimitKey);
+      const penaltyKey = KVStorageService.keys.userPenalty(userId);
+      const violationKey = KVStorageService.keys.userViolations(userId);
+      
+      // Clear all rate limit related data
+      await Promise.all([
+        KVStorageService.delete(rateLimitKey),
+        KVStorageService.delete(penaltyKey),
+        KVStorageService.delete(violationKey)
+      ]);
+      
+      return true;
     } catch (error) {
       console.error(`Failed to reset rate limit for ${userId}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Clear recent rate limit actions for a specific action type
+   * Useful for recovering from failed operations that recorded actions
+   */
+  static async clearRecentActions(
+    userId: string, 
+    action: keyof typeof RateLimitService.LIMITS,
+    minutesToClear: number = 5
+  ): Promise<boolean> {
+    try {
+      const rateLimitKey = KVStorageService.keys.rateLimit(userId);
+      const clearBefore = Date.now() - (minutesToClear * 60 * 1000);
+      
+      await KVStorageService.atomicUpdate<RateLimitData>(
+        rateLimitKey,
+        (current) => {
+          if (!current) return { minute: [], hour: [], day: [] };
+          
+          // Remove recent actions from all time periods
+          current.minute = current.minute.filter(timestamp => timestamp < clearBefore);
+          current.hour = current.hour.filter(timestamp => timestamp < clearBefore);
+          current.day = current.day.filter(timestamp => timestamp < clearBefore);
+          
+          return current;
+        },
+        RateLimitService.TTL.day
+      );
+      
+      return true;
+    } catch (error) {
+      console.error(`Failed to clear recent actions for ${userId}:${action}:`, error);
       return false;
     }
   }
@@ -430,8 +475,7 @@ export class RateLimitService {
     return {
       allowed: true,
       remaining,
-      resetTime: now + (60 * 1000),
-      reason: undefined
+      resetTime: now + (60 * 1000)
     };
   }
 
@@ -493,8 +537,7 @@ export class RateLimitService {
         ipLimits.hour - usage.hour,
         ipLimits.day - usage.day
       ),
-      resetTime: now + (60 * 1000),
-      reason: undefined
+      resetTime: now + (60 * 1000)
     };
   }
 

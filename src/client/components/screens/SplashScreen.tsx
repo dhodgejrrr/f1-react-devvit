@@ -38,7 +38,7 @@ export const SplashScreen = () => {
   return (
     <div className="layout-stack content-container" style={{
       minHeight: '100vh',
-      backgroundColor: '#ff0000',
+      backgroundColor: '#000000',
       color: '#ffffff',
       position: 'relative',
       justifyContent: 'center'

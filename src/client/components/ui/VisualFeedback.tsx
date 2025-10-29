@@ -84,7 +84,7 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({
       )}>
         {rating !== 'false_start' ? (
           <div className={clsx('text-hero', `color-${config.color}`)}>
-            {time}MS
+            {time.toFixed(3)}MS
           </div>
         ) : (
           <div className="text-hero color-red">

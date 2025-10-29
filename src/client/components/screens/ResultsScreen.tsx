@@ -176,7 +176,7 @@ export const ResultsScreen = () => {
     if (!challengeCreation.challengeData) return;
 
     const { challengeUrl, challengeId } = challengeCreation.challengeData;
-    const shareText = `🏎️ F1 Start Challenge! I got ${result?.reactionTime}ms (${result?.rating.toUpperCase()}). Can you beat my reaction time? Challenge ID: ${challengeId}`;
+    const shareText = `🏎️ F1 Start Challenge! I got ${result?.reactionTime.toFixed(3)}ms (${result?.rating.toUpperCase()}). Can you beat my reaction time? Challenge ID: ${challengeId}`;
     const fullShareText = `${shareText}\n\n${challengeUrl}`;
 
     try {
@@ -202,8 +202,8 @@ export const ResultsScreen = () => {
           
         case 'reddit':
           // Create a Reddit post URL with pre-filled content
-          const redditTitle = encodeURIComponent(`F1 Start Challenge: ${result?.reactionTime}ms reaction time!`);
-          const redditText = encodeURIComponent(`I just achieved a ${result?.reactionTime}ms reaction time (${result?.rating.toUpperCase()}) in the F1 Start Challenge!\n\nCan you beat my time? Accept my challenge here: ${challengeUrl}\n\nChallenge expires: ${new Date(challengeCreation.challengeData.expiresAt).toLocaleDateString()}`);
+          const redditTitle = encodeURIComponent(`F1 Start Challenge: ${result?.reactionTime.toFixed(3)}ms reaction time!`);
+          const redditText = encodeURIComponent(`I just achieved a ${result?.reactionTime.toFixed(3)}ms reaction time (${result?.rating.toUpperCase()}) in the F1 Start Challenge!\n\nCan you beat my time? Accept my challenge here: ${challengeUrl}\n\nChallenge expires: ${new Date(challengeCreation.challengeData.expiresAt).toLocaleDateString()}`);
           const redditUrl = `https://www.reddit.com/submit?title=${redditTitle}&text=${redditText}`;
           window.open(redditUrl, '_blank');
           break;
@@ -577,7 +577,7 @@ export const ResultsScreen = () => {
             {result.rating !== 'false_start' && (
               <PulseAnimation isActive={result.rating === 'perfect'} color="gold">
                 <div className="text-arcade color-white" style={{ fontSize: 'clamp(48px, 10vw, 80px)', lineHeight: '1' }}>
-                  {result.reactionTime}
+                  {result.reactionTime.toFixed(3)}
                   <span className="text-arcade color-white" style={{ fontSize: 'clamp(24px, 5vw, 40px)' }}>MS</span>
                 </div>
               </PulseAnimation>
@@ -752,7 +752,7 @@ export const ResultsScreen = () => {
                   textAlign: 'center'
                 }}>
                   <div className="text-arcade text-medium color-white" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                    YOUR TIME: {result?.reactionTime}MS
+                    YOUR TIME: {result?.reactionTime.toFixed(3)}MS
                   </div>
                   <div className={`text-arcade text-small ${getResultColor()}`} style={{ marginBottom: 'var(--spacing-sm)' }}>
                     RATING: {result?.rating.toUpperCase()}
@@ -870,7 +870,7 @@ export const ResultsScreen = () => {
                     CHALLENGE ID: {challengeCreation.challengeData.challengeId}
                   </div>
                   <div className="text-arcade text-small color-white" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                    YOUR TIME TO BEAT: {result?.reactionTime}MS ({result?.rating.toUpperCase()})
+                    YOUR TIME TO BEAT: {result?.reactionTime.toFixed(3)}MS ({result?.rating.toUpperCase()})
                   </div>
                   <div className="text-arcade text-small color-white">
                     EXPIRES: {new Date(challengeCreation.challengeData.expiresAt).toLocaleDateString()} at {new Date(challengeCreation.challengeData.expiresAt).toLocaleTimeString()}
@@ -1026,7 +1026,7 @@ export const ResultsScreen = () => {
                   textAlign: 'center'
                 }}>
                   <div className="text-arcade text-medium color-white" style={{ marginBottom: 'var(--spacing-sm)' }}>
-                    YOUR TIME: {result?.reactionTime}MS
+                    YOUR TIME: {result?.reactionTime.toFixed(3)}MS
                   </div>
                   <div className={`text-arcade text-small ${getResultColor()}`}>
                     RATING: {result?.rating.toUpperCase()}
