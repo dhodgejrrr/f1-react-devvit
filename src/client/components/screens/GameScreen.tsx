@@ -7,12 +7,46 @@ export const GameScreen = () => {
   const [lights, setLights] = useState([false, false, false, false, false]);
   const [gamePhase, setGamePhase] = useState<'starting' | 'sequence' | 'waiting' | 'finished'>('starting');
   const [lightsOutTime, setLightsOutTime] = useState<number>(0);
-  // Start the light sequence when component mounts
+  const [timeouts, setTimeouts] = useState<NodeJS.Timeout[]>([]);
+
+  // Reset component state when game state changes
   useEffect(() => {
     if (state.currentState === GameState.LIGHTS_SEQUENCE) {
+      // Clear any existing timeouts
+      timeouts.forEach(timeout => clearTimeout(timeout));
+      setTimeouts([]);
+      
+      // Reset local state
+      setLights([false, false, false, false, false]);
+      setGamePhase('starting');
+      setLightsOutTime(0);
+      
+      // Start the sequence
       startSequence();
     }
   }, [state.currentState]);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
+  }, [timeouts]);
+
+  // Handle keyboard input (spacebar)
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.code === 'Space' && (gamePhase === 'sequence' || gamePhase === 'waiting')) {
+        event.preventDefault();
+        handleReaction();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [gamePhase, lightsOutTime, timeouts]);
 
   // Start the light sequence
   const startSequence = () => {
@@ -20,27 +54,37 @@ export const GameScreen = () => {
     setGamePhase('sequence');
     setLights([false, false, false, false, false]);
 
+    // Create array to track timeouts for cleanup
+    const newTimeouts: NodeJS.Timeout[] = [];
+
     // Activate lights one by one (900ms intervals)
-    setTimeout(() => setLights([true, false, false, false, false]), 0);
-    setTimeout(() => setLights([true, true, false, false, false]), 900);
-    setTimeout(() => setLights([true, true, true, false, false]), 1800);
-    setTimeout(() => setLights([true, true, true, true, false]), 2700);
-    setTimeout(() => setLights([true, true, true, true, true]), 3600);
+    newTimeouts.push(setTimeout(() => setLights([true, false, false, false, false]), 0));
+    newTimeouts.push(setTimeout(() => setLights([true, true, false, false, false]), 900));
+    newTimeouts.push(setTimeout(() => setLights([true, true, true, false, false]), 1800));
+    newTimeouts.push(setTimeout(() => setLights([true, true, true, true, false]), 2700));
+    newTimeouts.push(setTimeout(() => setLights([true, true, true, true, true]), 3600));
 
     // Random delay then lights out (500-2500ms after all lights on)
     const randomDelay = Math.random() * 2000 + 500;
-    setTimeout(() => {
+    newTimeouts.push(setTimeout(() => {
       setLights([false, false, false, false, false]);
       setLightsOutTime(performance.now());
       setGamePhase('waiting');
       dispatch({ type: 'TRANSITION_STATE', payload: GameState.WAITING_FOR_INPUT });
-    }, 3600 + randomDelay);
+    }, 3600 + randomDelay));
+
+    // Store timeouts for cleanup
+    setTimeouts(newTimeouts);
   };
 
   // Handle user reaction
   const handleReaction = () => {
     if (gamePhase === 'sequence') {
-      // False start
+      // False start - clear all timeouts to prevent further state changes
+      timeouts.forEach(timeout => clearTimeout(timeout));
+      setTimeouts([]);
+      
+      setGamePhase('finished');
       dispatch({ type: 'SET_RESULT', payload: {
         reactionTime: -1,
         rating: 'false_start',
@@ -51,6 +95,7 @@ export const GameScreen = () => {
       dispatch({ type: 'TRANSITION_STATE', payload: GameState.SHOWING_RESULTS });
     } else if (gamePhase === 'waiting') {
       // Valid reaction
+      setGamePhase('finished');
       const reactionTime = performance.now() - lightsOutTime;
       const getRating = (time: number) => {
         if (time < 200) return 'perfect';
